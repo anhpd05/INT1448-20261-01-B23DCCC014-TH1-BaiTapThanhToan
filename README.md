@@ -5,7 +5,7 @@ Sinh viên thanh toán học phí qua **Fee Service** (cổng 4001). Fee Service
 - **Trước**: bank-client ngây thơ (`--naive`). Mỗi request mở một kết nối mới, không timeout, không retry, mọi lỗi đều coi là "không rõ kết quả".
 - **Sau**: bank-client bền vững. Connect timeout 1s, deadline 4s tính từ lúc nhận request, pool keep-alive tối đa 10 socket, tối đa 3 lần gọi dùng cùng `Idempotency-Key`.
 
-Mỗi ảnh là output thật của lệnh ghi ở dòng `$` đầu ảnh. File log cùng tên nằm trong [`evidence/`](./evidence).
+Mỗi ảnh là output thật của lệnh ghi ở dòng `$` đầu ảnh. File log cùng tên nằm trong [`evidence/`](./Lab3/evidence).
 
 ## Cách đọc một ảnh
 
@@ -49,13 +49,13 @@ Thuật ngữ:
 
 **Trước** (`npm run scenario -- tc1 --naive`):
 
-![TH1 trước](evidence/tc1-truoc.png)
+![TH1 trước](Lab3/evidence/tc1-truoc.png)
 
 Đọc ảnh: `Bank tắt: POST` ra `504 PENDING (161ms)` và `BANK_URL=:4999: POST` ra `504 PENDING`, nên hai dòng FAIL tương ứng. Fee Service không sập (`Fee Service còn sống: có`). Lỗi nằm ở mã trả về. Kết nối bị từ chối (`ECONNREFUSED`) nghĩa là chắc chắn bank chưa trừ tiền, nhưng bản này coi mọi lỗi là "không rõ" nên giữ lệnh PENDING không cần thiết.
 
 **Sau** (`npm run scenario -- tc1`):
 
-![TH1 sau](evidence/tc1-sau.png)
+![TH1 sau](Lab3/evidence/tc1-sau.png)
 
 Đọc ảnh: cả hai dòng POST khi bank không dùng được đều ra `503 FAILED` trong 247ms và 198ms, dưới 1,5s. `Bank bật lại: POST` ra `201 PAID` mà không restart Fee Service, vì Fee Service không nhớ trạng thái "bank đã chết" giữa các request. 4/4 PASS.
 
@@ -80,13 +80,13 @@ Thuật ngữ:
 
 **Trước** (`npm run scenario -- tc2 --naive`):
 
-![TH2 trước](evidence/tc2-truoc.png)
+![TH2 trước](Lab3/evidence/tc2-truoc.png)
 
 Đọc ảnh: `1 POST` ra `201 PAID (5173ms)`, tức chờ hết 5s của bank, vượt ngưỡng 4,5s nên có FAIL ở `504 PENDING` và hai dòng `≤ 4500ms`. Dòng `GET /fees < 300ms` vẫn PASS (4ms). Điều này không phải nhờ phần sửa: Node không bị chặn khi chờ I/O nên bản nào cũng trả lời nhanh.
 
 **Sau** (`npm run scenario -- tc2`):
 
-![TH2 sau](evidence/tc2-sau.png)
+![TH2 sau](Lab3/evidence/tc2-sau.png)
 
 Đọc ảnh: `1 POST` ra `504 PENDING (4112ms)`, `20 POST: lâu nhất` là `4050ms`, đều dưới 4,5s. Fee Service cắt chờ ở deadline 4s tính từ lúc nhận request và giữ lệnh PENDING vì không biết bank có trừ tiền hay không. 4/4 PASS.
 
@@ -111,13 +111,13 @@ Thuật ngữ:
 
 **Trước** (`npm run scenario -- tc3 --naive`):
 
-![TH3 trước](evidence/tc3-truoc.png)
+![TH3 trước](Lab3/evidence/tc3-truoc.png)
 
 Đọc ảnh: số kết nối là `200`, mỗi thanh toán mở một kết nối riêng, nên dòng `Số kết nối TCP ≤ 20` FAIL. Thanh toán vẫn thành công cả 200 và cả 3 lần sau khi nghỉ.
 
 **Sau** (`npm run scenario -- tc3`):
 
-![TH3 sau](evidence/tc3-sau.png)
+![TH3 sau](Lab3/evidence/tc3-sau.png)
 
 Đọc ảnh: số kết nối là `10`, bằng `maxSockets` của pool, và 200 thanh toán đều thành công. Ba thanh toán sau khi nghỉ 6,5s vẫn ra `201 PAID`: socket nhàn rỗi tự đóng sau 4s, trước mốc 5s của bank, nên không dùng nhầm socket đã chết. 3/3 PASS.
 
@@ -147,13 +147,13 @@ Lưu ý: tiêu chí `Sau nhàn rỗi vẫn 201 cả 3` PASS ở cả hai bản, 
 
 **Trước** (`npm run scenario -- tc4a --naive`):
 
-![TH4a trước](evidence/tc4a-truoc.png)
+![TH4a trước](Lab3/evidence/tc4a-truoc.png)
 
 Đọc ảnh: `/stats.charges` là `60` nhưng `PAID` chỉ `48/60`, nên `Bank đã trừ nhưng Fee không ghi nhận` là `12`: 12 lệnh bị trừ tiền thật nhưng Fee Service vẫn để PENDING. Dòng `≥ 54/60 PAID` FAIL. `duplicates = 0` ở bản này không có nghĩa là an toàn: bản này không gửi lại nên không có lần gọi thứ hai để tạo trùng. Vấn đề của nó là lệch dữ liệu giữa hai phía.
 
 **Sau** (`npm run scenario -- tc4a`):
 
-![TH4a sau](evidence/tc4a-sau.png)
+![TH4a sau](Lab3/evidence/tc4a-sau.png)
 
 Đọc ảnh: `PAID` là `60/60`, `/stats.charges` là `60` và `/stats.duplicates` là `0`. Fee Service gửi lại cùng `Idempotency-Key`; bank nhận ra mã đã xử lý và trả lại kết quả cũ thay vì trừ tiền lần nữa. Công nợ giảm `60.000đ`, khớp tổng PAID. 5/5 PASS.
 
@@ -171,13 +171,13 @@ Lưu ý: tiêu chí `Sau nhàn rỗi vẫn 201 cả 3` PASS ở cả hai bản, 
 
 **Trước** (`npm run scenario -- tc4b --naive`):
 
-![TH4b trước](evidence/tc4b-truoc.png)
+![TH4b trước](Lab3/evidence/tc4b-truoc.png)
 
 Đọc ảnh: `PAID` là `35/60`, `504 PENDING` là `25`. Dòng `mã khác` liệt kê 25 mã 504: dòng này gom mọi mã khác 201 và khác mã kỳ vọng (503), nên với bản "Trước" nó không rỗng và đó là bình thường. Bản này không gửi lại và không phân biệt được lỗi 5xx (chắc chắn chưa trừ tiền) với lỗi "không rõ", nên 25 lệnh bị giữ PENDING dù bank chưa trừ đồng nào. `Bank đã trừ nhưng Fee không ghi nhận` là `0`, đúng với bản chất lỗi 500. Hai dòng FAIL: `≥ 54/60 PAID` và `Lệnh còn lại là 503`.
 
 **Sau** (`npm run scenario -- tc4b`):
 
-![TH4b sau](evidence/tc4b-sau.png)
+![TH4b sau](Lab3/evidence/tc4b-sau.png)
 
 Đọc ảnh: `PAID` là `60/60`. Mỗi lệnh được gọi tối đa 3 lần cùng `Idempotency-Key`, và lỗi 500 được thử lại. Xác suất một lệnh hỏng cả 3 lần là 0,3³ = 2,7%, nên một lần chạy vẫn có thể còn vài lệnh 503 (các lần chạy khác trong lúc phát triển ra 57 và 58 PAID). `/stats.charges` bằng `PAID` và `duplicates = 0`. 5/5 PASS.
 
@@ -195,11 +195,11 @@ Lưu ý: tiêu chí `Sau nhàn rỗi vẫn 201 cả 3` PASS ở cả hai bản, 
 
 **Trước** (`npm run scenario -- tc4c --naive`):
 
-![TH4c trước](evidence/tc4c-truoc.png)
+![TH4c trước](Lab3/evidence/tc4c-truoc.png)
 
 **Sau** (`npm run scenario -- tc4c`):
 
-![TH4c sau](evidence/tc4c-sau.png)
+![TH4c sau](Lab3/evidence/tc4c-sau.png)
 
 Đọc ảnh: cả hai bản đều ra `402 FAILED` và `/stats.requests` là `1`. Lỗi 4xx được coi là bị từ chối thật nên bản "Sau" cũng không gửi lại. Tình huống này không có chênh lệch trước/sau; nó chứng minh việc retry không áp dụng bừa cho mọi lỗi.
 
@@ -213,6 +213,7 @@ Lưu ý: tiêu chí `Sau nhàn rỗi vẫn 201 cả 3` PASS ở cả hai bản, 
 Mỗi lần chạy script tự bật bank và Fee Service rồi tắt cả hai, nên dữ liệu (công nợ, lệnh thanh toán) luôn bắt đầu từ đầu.
 
 ```
+cd Lab3
 npm install
 npm run scenario -- tc1            # bản "Sau"
 npm run scenario -- tc1 --naive    # bản "Trước"
