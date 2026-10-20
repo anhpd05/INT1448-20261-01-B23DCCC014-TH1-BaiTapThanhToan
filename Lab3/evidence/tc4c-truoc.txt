@@ -1,0 +1,16 @@
+# 2026-10-20 11:17:13  node v22.16.0  exit=0
+$ npm run scenario -- tc4c --naive
+> lab3-fee-bank-resilience@1.0.0 scenario
+> node scripts/run-scenario.js tc4c --naive
+
+
+=== tc4c — TRƯỚC (NAIVE=1) ===
+| Chỉ số | Giá trị |
+|---|---|
+| POST 25.000.000đ | 402 FAILED (172ms) |
+| /stats.requests | 1 |
+
+PASS  402
+PASS  /stats.requests = 1 (không retry lỗi 4xx)
+
+2/2 tiêu chí đạt

@@ -1,0 +1,20 @@
+# 2026-10-20 11:17:13  node v22.16.0  exit=0
+$ npm run scenario -- tc2 --naive
+> lab3-fee-bank-resilience@1.0.0 scenario
+> node scripts/run-scenario.js tc2 --naive
+
+
+=== tc2 — TRƯỚC (NAIVE=1) ===
+| Chỉ số | Giá trị |
+|---|---|
+| 1 POST (bank DELAY_MS=5000) | 201 PAID (5173ms) |
+| 20 POST đang chờ: GET /fees | 200 (4ms) |
+| 20 POST: lâu nhất | 5077ms |
+| 20 POST: mã trả về | 201 |
+
+FAIL  504 PENDING
+FAIL  POST ≤ 4500ms
+PASS  GET /fees < 300ms khi 20 thanh toán đang chờ
+FAIL  Mọi POST ≤ 4500ms
+
+1/4 tiêu chí đạt

@@ -1,0 +1,21 @@
+# 2026-10-20 11:17:13  node v22.16.0  exit=0
+$ npm run scenario -- tc1 --naive
+> lab3-fee-bank-resilience@1.0.0 scenario
+> node scripts/run-scenario.js tc1 --naive
+
+
+=== tc1 — TRƯỚC (NAIVE=1) ===
+| Chỉ số | Giá trị |
+|---|---|
+| Bank tắt: POST | 504 PENDING (161ms) |
+| Bank tắt: GET /fees | 200 (6ms) |
+| Fee Service còn sống | có |
+| Bank bật lại: POST (không restart Fee) | 201 PAID (32ms) |
+| BANK_URL=:4999: POST | 504 PENDING (61ms) |
+
+FAIL  Bank tắt → 503 + {error,paymentId,status} < 1,5s
+PASS  Fee Service không sập, GET /fees 200
+PASS  Bank bật lại → 201
+FAIL  BANK_URL=:4999 → 503 < 1,5s
+
+2/4 tiêu chí đạt

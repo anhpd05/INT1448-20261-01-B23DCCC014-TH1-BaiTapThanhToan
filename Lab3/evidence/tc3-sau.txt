@@ -1,0 +1,19 @@
+# 2026-10-20 11:17:13  node v22.16.0  exit=0
+$ npm run scenario -- tc3
+> lab3-fee-bank-resilience@1.0.0 scenario
+> node scripts/run-scenario.js tc3
+
+
+=== tc3 — SAU (bền vững) ===
+| Chỉ số | Giá trị |
+|---|---|
+| 200 POST, 10 song song: thành công | 200/200 |
+| Tổng thời gian | 466ms |
+| Số kết nối TCP Fee Service mở tới bank | 10 |
+| Sau 6,5s nhàn rỗi: 3 POST | 201 PAID (9ms) | 201 PAID (4ms) | 201 PAID (4ms) |
+
+PASS  200/200 thành công
+PASS  Số kết nối TCP ≤ 20
+PASS  Sau nhàn rỗi vẫn 201 cả 3
+
+3/3 tiêu chí đạt

@@ -1,0 +1,26 @@
+# 2026-10-20 11:17:13  node v22.16.0  exit=0
+$ npm run scenario -- tc4a
+> lab3-fee-bank-resilience@1.0.0 scenario
+> node scripts/run-scenario.js tc4a
+
+
+=== tc4a — SAU (bền vững) ===
+| Chỉ số | Giá trị |
+|---|---|
+| DROP_RATE=0.3: PAID | 60/60 |
+| DROP_RATE=0.3: 503 FAILED | 0 |
+| DROP_RATE=0.3: 504 PENDING | 0 |
+| DROP_RATE=0.3: mã khác | không |
+| Lâu nhất | 76ms |
+| /stats.charges | 60 |
+| /stats.duplicates | 0 |
+| Bank đã trừ nhưng Fee không ghi nhận | 0 |
+| Công nợ giảm | 60.000đ (tổng PAID 60.000đ) |
+
+PASS  duplicates = 0
+PASS  ≥ 54/60 PAID
+PASS  Lệnh còn lại là 504
+PASS  Công nợ giảm đúng tổng tiền lệnh PAID
+PASS  Mọi POST ≤ 4500ms
+
+5/5 tiêu chí đạt

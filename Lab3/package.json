@@ -1,0 +1,15 @@
+{
+  "name": "lab3-fee-bank-resilience",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "description": "Lab 3 — Fee Service ↔ ngân hàng giả lập: kết nối bền vững",
+  "scripts": {
+    "bank": "node bank/server.js",
+    "fee": "node fee-service/server.js",
+    "scenario": "node scripts/run-scenario.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  }
+}
