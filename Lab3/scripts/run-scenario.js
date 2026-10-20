@@ -29,13 +29,13 @@ async function waitPort(port, open) {
   throw new Error(`port ${port} did not become ${open ? 'open' : 'closed'}`);
 }
 
-function service(file, port) {
+function service(file, port, defaultEnv = {}) {
   let child = null;
   return {
     async start(env = {}) {
       if (child) await this.stop();
       if (await portOpen(port)) throw new Error(`port ${port} already in use`);
-      child = spawn(process.execPath, [file], { cwd: ROOT, stdio: 'ignore', env: { ...process.env, ...env } });
+      child = spawn(process.execPath, [file], { cwd: ROOT, stdio: 'ignore', env: { ...process.env, ...defaultEnv, ...env } });
       await waitPort(port, true);
     },
     async stop() {
@@ -226,11 +226,9 @@ async function main() {
     process.exit(2);
   }
 
-  const bank = service('bank/server.js', 4002);
+  const bank = service('bank/server.js', 4002, cfg.bankEnv);
   const fee = service('fee-service/server.js', 4001);
-  const bankStart = bank.start.bind(bank);
   const feeEnv = naive ? { NAIVE: '1' } : {};
-  bank.start = (env) => bankStart({ ...(cfg.bankEnv || {}), ...(env || {}) });
 
   try {
     if (cfg.bank !== false) await bank.start();

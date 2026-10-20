@@ -218,7 +218,7 @@ npm run scenario -- tc1            # bản "Sau"
 npm run scenario -- tc1 --naive    # bản "Trước"
 ```
 
-Các tình huống: `tc1`, `tc2`, `tc3`, `tc4a`, `tc4b`, `tc4c`. Chạy lại toàn bộ và sinh lại ảnh: `python scripts/capture-evidence.py` (cần Python và Pillow). Lệnh này ghi đè `evidence/`, và số liệu TH4a/TH4b sẽ khác lần chạy hiện tại.
+Các tình huống: `tc1`, `tc2`, `tc3`, `tc4a`, `tc4b`, `tc4c`. Số liệu TH4a/TH4b là ngẫu nhiên nên sẽ khác lần chạy trong ảnh.
 
 ## Giới hạn
 

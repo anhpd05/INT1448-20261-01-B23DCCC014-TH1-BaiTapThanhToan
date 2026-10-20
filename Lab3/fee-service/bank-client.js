@@ -20,6 +20,18 @@ function parseJson(buffer) {
   }
 }
 
+function postOptions(payload, idemKey, extra) {
+  return {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Content-Length': Buffer.byteLength(payload),
+      'Idempotency-Key': idemKey,
+    },
+    ...extra,
+  };
+}
+
 function toResult(status, body) {
   if (status >= 200 && status < 300) return { kind: 'charged', chargeId: body && body.chargeId };
   if (status >= 400 && status < 500) return { kind: 'rejected', httpStatus: status, body };
@@ -31,15 +43,7 @@ function chargeNaive({ reference, amount, idemKey }) {
     const payload = JSON.stringify({ reference, amount });
     const req = http.request(
       bankUrl(),
-      {
-        method: 'POST',
-        agent: false,
-        headers: {
-          'Content-Type': 'application/json',
-          'Content-Length': Buffer.byteLength(payload),
-          'Idempotency-Key': idemKey,
-        },
-      },
+      postOptions(payload, idemKey, { agent: false }),
       (res) => {
         const chunks = [];
         res.on('data', (c) => chunks.push(c));
@@ -87,16 +91,7 @@ function attemptOnce({ reference, amount, idemKey, deadlineAt }) {
     const payload = JSON.stringify({ reference, amount });
     const req = http.request(
       bankUrl(),
-      {
-        method: 'POST',
-        agent,
-        signal: AbortSignal.timeout(remaining),
-        headers: {
-          'Content-Type': 'application/json',
-          'Content-Length': Buffer.byteLength(payload),
-          'Idempotency-Key': idemKey,
-        },
-      },
+      postOptions(payload, idemKey, { agent, signal: AbortSignal.timeout(remaining) }),
       (res) => {
         const chunks = [];
         res.on('data', (c) => chunks.push(c));
